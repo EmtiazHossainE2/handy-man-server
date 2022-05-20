@@ -17,6 +17,7 @@ app.use(express.json())
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.6r1v6.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+//6
 async function run() {
     try {
         //7
@@ -31,15 +32,16 @@ async function run() {
             res.send(services)
         })
 
-        // get single service 
+        //9 get single service 
         app.get('/service/:id', async (req, res) => {
             const id = req.params.id;
+            // console.log(id);
             const query = { _id: ObjectId(id) };
             const service = await serviceCollection.findOne(query)
             res.send(service)
         })
 
-        // booking 
+        //10 booking 
         app.post('/booking', async (req, res) => {
             const booking = req.body
             const query = { serviceName: booking.serviceName, email: booking.email, date: booking.date }
@@ -53,7 +55,7 @@ async function run() {
             }
         })
 
-        // available 
+        //11 available 
         app.put('/service/:id', async (req, res) => {
             const id = req.params.id
             const updateService = req.body
@@ -66,8 +68,16 @@ async function run() {
             };
             const result = await serviceCollection.updateOne(filter, updateDoc, options);
             res.send(result)
-
         })
+
+        //12 get my booking 
+        app.get('/booking' , async(req,res) => {
+            const email = req.query.email 
+            const query = {email : email} 
+            const bookings = await bookingCollection.find(query).toArray()
+            res.send(bookings)
+        })
+        
 
 
 
