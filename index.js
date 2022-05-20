@@ -3,6 +3,7 @@ const express = require('express');
 const app = express()
 const port = process.env.PORT || 5000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 
 //3
 const cors = require('cors')
@@ -24,6 +25,7 @@ async function run() {
         await client.connect();
         const serviceCollection = client.db("handy-man").collection("services");
         const bookingCollection = client.db("handy-man").collection("bookings");
+        const userCollection = client.db("handy-man").collection("users");
 
         //8 service load (Read)
         app.get('/service', async (req, res) => {
@@ -76,6 +78,25 @@ async function run() {
             const query = {email : email} 
             const bookings = await bookingCollection.find(query).toArray()
             res.send(bookings)
+        })
+
+        //13 upsert user (create or update ) 
+        app.put('/user/:email' , async(req,res) => {
+            const email = req.params.email;
+            const filter = {email : email } ; 
+            const user = req.body ; 
+            const options = {upsert : true}
+            const updateDoc = {
+                $set: user 
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+        //14 get users 
+        app.get('/user' , async(req,res) => {
+            const users = await userCollection.find().toArray()
+            res.send(users)
         })
         
 
