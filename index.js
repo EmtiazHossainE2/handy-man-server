@@ -48,6 +48,19 @@ async function run() {
         const bookingCollection = client.db("handy-man").collection("bookings");
         const userCollection = client.db("handy-man").collection("users");
 
+         
+        // 18 verify admin middleware 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email
+            const requesterAccount = await userCollection.findOne({ email: requester })
+            if (requesterAccount.role === 'admin') {
+                next()
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden Access' });
+            }
+        }
+
         //8 service load (Read)
         app.get('/service', async (req, res) => {
             const query = {}
@@ -125,9 +138,36 @@ async function run() {
         })
 
         //16 get users 
-        app.get('/user', async (req, res) => {
+        app.get('/user',verifyJWT, async (req, res) => {
             const users = await userCollection.find().toArray()
             res.send(users)
+        })
+
+        //20 delete user/admin
+        app.delete('/user/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email
+            const filter = {email : email}
+            const result = await userCollection.deleteOne(filter)
+            res.send(result)
+        })
+
+        //17 make admin 
+        app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {role : 'admin'}
+            };
+            const result = await userCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        // 19 check admin
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email
+            const user = await userCollection.findOne({ email: email })
+            const isAdmin = user.role === 'admin'
+            res.send({ admin: isAdmin })
         })
 
 
