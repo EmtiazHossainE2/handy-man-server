@@ -160,18 +160,31 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/user/user/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {role : 'user'}
+            };
+            const result = await userCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+
+
         // 19 check admin
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email
             const user = await userCollection.findOne({ email: email })
-            const isAdmin = user.role === 'admin'
+            const isAdmin = user?.role === 'admin'
+            // console.log(isAdmin);
             res.send({ admin: isAdmin })
         })
 
         //20 get user info (profile)
         app.get('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email
-            console.log(email);
+            // console.log(email);
             const userInfo = await userCollection.findOne({email : email})
             res.send(userInfo)
         })
