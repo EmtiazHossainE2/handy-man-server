@@ -119,8 +119,6 @@ async function run() {
             else {
                 return res.status(403).send({ message: 'Forbidden Access' });
             }
-
-
         })
 
         //13 upsert user (create or update ) 
@@ -168,6 +166,14 @@ async function run() {
             const user = await userCollection.findOne({ email: email })
             const isAdmin = user.role === 'admin'
             res.send({ admin: isAdmin })
+        })
+
+        //20 get user info (profile)
+        app.get('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email
+            console.log(email);
+            const userInfo = await userCollection.findOne({email : email})
+            res.send(userInfo)
         })
 
 
