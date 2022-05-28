@@ -181,12 +181,37 @@ async function run() {
             res.send({ admin: isAdmin })
         })
 
-        //20 get user info (profile)
-        app.get('/user/:email', verifyJWT, async (req, res) => {
+        //20 Profile 
+        app.get('/profile/:email', verifyJWT, async (req, res) => {
             const email = req.params.email
-            // console.log(email);
-            const userInfo = await userCollection.findOne({email : email})
-            res.send(userInfo)
+            const profile = await userCollection.findOne({ email: email })
+            res.send(profile)
+        })
+
+        //21 update profile
+        app.put('/profile/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id
+            const updateInfo = req.body
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: updateInfo
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+        //22 update img
+        app.put('/my-image/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id
+            const updateInfo = req.body
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: updateInfo
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
         })
 
 
